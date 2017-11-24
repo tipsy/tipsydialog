@@ -2,11 +2,22 @@
 
     function TipsyDialog() {
 
+        const overlayId = "td-overlay";
+        const confirmId = "td-yes";
+        const abortId = "td-no";
+        const inputId = "td-input";
+
+        const id = id => document.getElementById(id);
+        const noop = () => {
+        };
+
+        let clickListener = null;
+
         this.alert = function (message) {
             createDialog({
                 showAbort: false,
                 message: message,
-                confirmBtm: "Ok",
+                confirmBtnTxt: "Ok",
             });
         };
 
@@ -14,59 +25,75 @@
             createDialog({
                 showAbort: config.hideAbort !== true,
                 message: config.message,
-                confirmBtm: config.confirmBtm,
-                abortBtn: config.abortBtn,
-                confirm: config.confirm,
-                abort: config.abort,
+                html: config.html,
+                confirmBtnTxt: config.confirmBtnTxt,
+                abortBtnTxt: config.abortBtnTxt,
+                confirmCb: config.confirm,
+                abortCb: config.abort,
+            });
+        };
+
+        this.prompt = function (config) {
+            createDialog({
+                isPrompt: true,
+                placeholder: config.placeholder,
+                showAbort: config.hideAbort !== true,
+                message: config.message,
+                html: config.html,
+                confirmBtnTxt: config.confirmBtnTxt,
+                abortBtnTxt: config.abortBtnTxt,
+                confirmCb: config.confirm,
+                abortCb: config.abort,
             });
         };
 
         let createDialog = config => {
-
-            if (document.getElementById("td-overlay") !== null) {
+            if (id(overlayId) !== null) {
                 throw Error("TipsyDialog already open");
             }
-
             document.body.insertAdjacentHTML("beforeEnd", `
-              <div id="td-overlay" style="${overlayCss}">
+              <div id="${overlayId}" style="${overlayCss}">
                 <div style="${dialogCss}">
-                  <div style="${messageCss}">${config.message}</div>
+                  ${config.message ? `<div style="${messageCss}">${config.message}</div>` : config.html }
+                  ${config.isPrompt ? `<input id="${inputId}" style="${inputCss}" type="text" placeholder="${config.placeholder || "Enter something"}">` : "" }
                   <div style="${buttonWrapCss}">
-                    ${config.showAbort ? `<div id="td-no" style="${defaultBtnCss}">${config.abortBtn || "No"}</div>` : ''}
-                    <div id="td-yes" style="${confirmBtnCss}">${config.confirmBtm || "Yes"}</div>
+                    ${config.showAbort ? `<div id="${abortId}" style="${defaultBtnCss}">${config.abortBtnTxt || "No"}</div>` : ''}
+                    <div id="${confirmId}" style="${confirmBtnCss}">${config.confirmBtnTxt || "Yes"}</div>
                   </div>
                 </div>
               </div>
             `);
-
-            setTimeout(() => document.getElementById("td-overlay").style.opacity = "1", 50);
-            document.getElementById("td-yes").addEventListener("click", () => {
-                closeDialog();
-                if (config.confirm) {
-                    config.confirm();
-                }
-            });
-
-            if (config.showAbort) {
-                document.getElementById("td-no").addEventListener("click", () => {
+            clickListener = e => {
+                const val = config.isPrompt ? id(inputId).value : "";
+                if (confirmId === e.target.id) {
+                    (config.confirmCb || noop).call(this, val);
                     closeDialog();
-                    if (config.abort) {
-                        config.abort();
-                    }
-                });
-            }
-
-            function closeDialog() {
-                if (document.getElementById("td-overlay") !== null) {
-                    document.getElementById("td-overlay").style.opacity = "0";
-                    setTimeout(() => document.body.removeChild(document.getElementById("td-overlay")), 200);
                 }
-            }
-
+                if (abortId === e.target.id) {
+                    (config.abortCb || noop).call();
+                    closeDialog();
+                }
+            };
+            openDialog()
         };
 
-        let overlayCss = `
-            box-sizing: border-box;
+        function openDialog() {
+            if(id(inputId) !== null) {
+                id(inputId).focus();
+            }
+            document.addEventListener("click", clickListener);
+            setTimeout(() => id(overlayId).style.opacity = "1", 50);
+        }
+
+        function closeDialog() {
+            document.removeEventListener("click", clickListener);
+            if (id(overlayId) !== null) {
+                id(overlayId).style.opacity = "0";
+                setTimeout(() => document.body.removeChild(id(overlayId)), 200);
+            }
+        }
+
+        const overlayCss = `
             position: fixed;
             height: 100%;
             width: 100%;
@@ -78,7 +105,7 @@
             transition: opacity .2s;
         `;
 
-        let dialogCss = `
+        const dialogCss = `
             box-sizing: border-box;
             font: 15px arial;
             position: fixed;
@@ -87,7 +114,7 @@
             transform: translateY(-50%);
             background: #fff;
             color: #444;
-            padding: 10px;
+            padding: 20px;
             margin: 0 auto;
             left: 0;
             right: 0;
@@ -96,7 +123,7 @@
             border-radius: 3px;
         `;
 
-        let messageCss = `
+        const messageCss = `
             box-sizing: border-box;
             font: 18px arial;
             font-weight: 700;
@@ -104,12 +131,24 @@
             margin: 25px 2%;
         `;
 
-        let buttonWrapCss = `
+        const inputCss = `
             box-sizing: border-box;
-            text-align: center;
+            width: 96%;
+            height: 40px;
+            border: 0;
+            border-bottom: 2px solid #007ace;
+            margin: 0 2% 20px;
+            font: 16px arial;
+            outline: 0;
         `;
 
-        let defaultBtnCss = `
+        const buttonWrapCss = `
+            box-sizing: border-box;
+            text-align: center;
+            margin: 15px 0;
+        `;
+
+        const defaultBtnCss = `
             box-sizing: border-box;
             border-radius: 3px;
             font: 16px arial;
@@ -118,13 +157,13 @@
             font-weight: 700;
             background: #999;
             width: 45%;
-            margin: 0px 2% 15px;
+            margin: 0 2%;
             display: inline-block;
             text-align: center;
             cursor: pointer;
         `;
 
-        let confirmBtnCss = `
+        const confirmBtnCss = `
             ${defaultBtnCss}
             background: #007ace;
         `;

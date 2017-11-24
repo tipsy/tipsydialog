@@ -7,7 +7,7 @@ const uglify = require('gulp-uglify');
 gulp.task('javascript', () => {
     del('dist').then(() => gulp.src('src/tipsydialog.js')
         .pipe(plumber())
-        .pipe(babel({presets: ['es2015']}))
+        .pipe(babel({presets: ['env']}))
         .pipe(uglify())
         .pipe(gulp.dest('dist'))
         .pipe(gulp.dest('docs'))
