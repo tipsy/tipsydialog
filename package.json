@@ -1,6 +1,6 @@
 {
   "name": "tipsydialog",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Simple alerts/confirms/prompts",
   "main": "dist/tipsydialog.js",
   "scripts": {

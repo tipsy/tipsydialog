@@ -13,6 +13,19 @@
 
         let clickListener = null;
 
+        this.spin  = function (message) {
+            createDialog({
+                hideConfirm: true,
+                showAbort: false,
+                spin: true,
+                message: message
+            });
+        };
+
+        this.stopSpinning = function () {
+            closeDialog();
+        };
+
         this.alert = function (message) {
             createDialog({
                 showAbort: false,
@@ -54,11 +67,14 @@
             document.body.insertAdjacentHTML("beforeEnd", `
               <div id="${overlayId}" style="${overlayCss}">
                 <div style="${dialogCss}">
-                  ${config.message ? `<div style="${messageCss}">${config.message}</div>` : config.html }
+                  <div style="${contentCss}">
+                    ${config.message ? `<div style="${messageCss}">${config.message}</div>` : config.html }
+                  </div>
                   ${config.isPrompt ? `<input id="${inputId}" style="${inputCss}" type="text" placeholder="${config.placeholder || "Enter something"}">` : "" }
-                  <div style="${buttonWrapCss}">
-                    ${config.showAbort ? `<div id="${abortId}" style="${defaultBtnCss}">${config.abortBtnTxt || "No"}</div>` : ''}
-                    <div id="${confirmId}" style="${confirmBtnCss}">${config.confirmBtnTxt || "Yes"}</div>
+                  <div style="${containerCss}">
+                    ${config.spin ? spinner : ""}
+                    ${config.showAbort ? `<div id="${abortId}" style="${defaultBtnCss}">${config.abortBtnTxt || "Cancel"}</div>` : ""}
+                    ${!config.hideConfirm ? `<div id="${confirmId}" style="${confirmBtnCss}">${config.confirmBtnTxt || "Yes"}</div>` : ""}
                   </div>
                 </div>
               </div>
@@ -123,12 +139,15 @@
             border-radius: 3px;
         `;
 
-        const messageCss = `
+        const contentCss = `
             box-sizing: border-box;
+            margin: 25px 2%;
+        `;
+
+        const messageCss = `
             font: 18px arial;
             font-weight: 700;
             text-align: center;
-            margin: 25px 2%;
         `;
 
         const inputCss = `
@@ -142,7 +161,7 @@
             outline: 0;
         `;
 
-        const buttonWrapCss = `
+        const containerCss = `
             box-sizing: border-box;
             text-align: center;
             margin: 15px 0;
@@ -152,10 +171,10 @@
             box-sizing: border-box;
             border-radius: 3px;
             font: 16px arial;
-            padding: 10px 15px;
-            color: #fff;
+            padding: 10px 32px;
+            color: #333;
             font-weight: 700;
-            background: #999;
+            background: #eee;
             width: 45%;
             margin: 0 2%;
             display: inline-block;
@@ -165,7 +184,18 @@
 
         const confirmBtnCss = `
             ${defaultBtnCss}
+            color: #fff;
             background: #007ace;
+        `;
+
+        const spinner = `
+            <?xml version="1.0" encoding="utf-8"?>
+            <svg width="48px" height="48px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid">
+                <circle cx="50" cy="50" r="40" stroke="#007ace" fill="none" stroke-width="7" stroke-linecap="round">
+                    <animate attributeName="stroke-dashoffset" dur="1.5s" repeatCount="indefinite" from="502" to="0"></animate>
+                    <animate attributeName="stroke-dasharray" dur="1.5s" repeatCount="indefinite" values="150.6 100.4;1 250;150.6 100.4"></animate>
+                </circle>
+            </svg>
         `;
 
     }

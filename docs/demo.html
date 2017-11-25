@@ -1,57 +1,80 @@
 <html>
     <head>
         <style>
+            * {
+                box-sizing: border-box;
+            }
             body {
                 max-width: 400px;
                 margin: 20px auto;
                 padding: 20px;
+                font: 16px arial;
             }
-
             button {
                 width: 100%;
                 height: 40px;
                 margin-bottom: 20px;
+                border: 0;
+                background: #007ace;
+                color: #fff;
+                cursor: pointer;
+                border-radius: 3px;
             }
         </style>
     </head>
     <body>
         <script src="tipsydialog.js"></script>
-        <button onclick="justAlert()">Alert</button>
-        <button onclick="justConfirm()">Confirm</button>
-        <button onclick="confirmAndAbortWithCallbacks()">Confirm or abort</button>
-        <button onclick="justPrompt()">Prompt</button>
+        <button onclick="alert()">Alert</button>
+        <button onclick="confirm()">Confirm</button>
+        <button onclick="confirmWithAbort()">Confirm/abort</button>
+        <button onclick="confirmWithAbortAndHtml()">Confirm/abort custom HTML</button>
+        <button onclick="prompt()">Prompt</button>
+        <button onclick="spin()">Spin 2s</button>
         <h1>Status: <span id="status">...</span></h1>
         <script>
 
             let id = id => document.getElementById(id);
 
-            function justAlert() {
-                TipsyDialog.alert('Alert');
+            function alert() {
+                TipsyDialog.alert("Alert");
             }
 
-            function justConfirm() {
+            function confirm() {
                 TipsyDialog.confirm({
                     hideAbort: true,
-                    message: 'Confirm',
+                    message: "Confirm",
                     confirm: () => id("status").textContent = "confirmed"
                 });
             }
 
-            function confirmAndAbortWithCallbacks() {
+            function confirmWithAbort() {
                 TipsyDialog.confirm({
-                    message: 'Confirm?',
+                    message: "Confirm?",
                     confirm: () => id("status").textContent = "confirmed",
                     abort: () => id("status").textContent = "aborted"
                 })
             }
 
-            function justPrompt() {
+            function confirmWithAbortAndHtml() {
+                TipsyDialog.confirm({
+                    html: `<h2>Are you sure?</h2><p>You can write <strong>whatever</strong> you <em>want</em> <a href="#">here</a></p>`,
+                    confirm: () => id("status").textContent = "confirmed",
+                    abort: () => id("status").textContent = "aborted"
+                })
+            }
+
+            function prompt() {
                 TipsyDialog.prompt({
                     message: "Please enter your name",
                     placeholder: "First name and last name",
                     confirm: result => id("status").textContent = result,
                     abort: result => id("status").textContent = "no name given"
                 });
+            }
+
+            function spin() {
+                TipsyDialog.spin("Please wait...");
+                setTimeout(() => TipsyDialog.stopSpinning(), 2000);
             }
         </script>
     </body>
