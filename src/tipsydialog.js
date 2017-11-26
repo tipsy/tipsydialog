@@ -13,7 +13,7 @@
 
         let clickListener = null;
 
-        this.spin  = function (message) {
+        this.spin = function (message) {
             createDialog({
                 hideConfirm: true,
                 showAbort: false,
@@ -48,6 +48,7 @@
 
         this.prompt = function (config) {
             createDialog({
+                rightAlignBtns: true,
                 isPrompt: true,
                 placeholder: config.placeholder,
                 showAbort: config.hideAbort !== true,
@@ -71,10 +72,10 @@
                     ${config.message ? `<div style="${messageCss}">${config.message}</div>` : config.html }
                   </div>
                   ${config.isPrompt ? `<input id="${inputId}" style="${inputCss}" type="text" placeholder="${config.placeholder || "Enter something"}">` : "" }
-                  <div style="${containerCss}">
+                  <div style="${config.rightAlignBtns ? containerCss + containerRightAlignCss : containerCss}">
                     ${config.spin ? spinner : ""}
-                    ${config.showAbort ? `<div id="${abortId}" style="${defaultBtnCss}">${config.abortBtnTxt || "Cancel"}</div>` : ""}
-                    ${!config.hideConfirm ? `<div id="${confirmId}" style="${confirmBtnCss}">${config.confirmBtnTxt || "Yes"}</div>` : ""}
+                    ${config.showAbort ? `<div id="${abortId}" style="${config.rightAlignBtns ? defaultBtnCss + autoWidth : defaultBtnCss}">${config.abortBtnTxt || "Cancel"}</div>` : ""}
+                    ${!config.hideConfirm ? `<div id="${confirmId}" style="${config.rightAlignBtns ? confirmBtnCss + autoWidth : confirmBtnCss}">${config.confirmBtnTxt || "Ok"}</div>` : ""}
                   </div>
                 </div>
               </div>
@@ -94,7 +95,7 @@
         };
 
         function openDialog() {
-            if(id(inputId) !== null) {
+            if (id(inputId) !== null) {
                 id(inputId).focus();
             }
             document.addEventListener("click", clickListener);
@@ -167,6 +168,11 @@
             margin: 15px 0;
         `;
 
+        const containerRightAlignCss = `
+            display: flex;
+            justify-content: flex-end;
+        `;
+
         const defaultBtnCss = `
             box-sizing: border-box;
             border-radius: 3px;
@@ -187,6 +193,8 @@
             color: #fff;
             background: #007ace;
         `;
+
+        const autoWidth = "width: auto";
 
         const spinner = `
             <?xml version="1.0" encoding="utf-8"?>
