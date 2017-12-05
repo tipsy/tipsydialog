@@ -36,20 +36,20 @@
             let id = id => document.getElementById(id);
 
             function alert() {
-                TipsyDialog.alert("Alert");
+                TipsyDialog.alert("Information about something");
             }
 
             function confirm() {
                 TipsyDialog.confirm({
                     hideAbort: true,
-                    message: "Confirm",
+                    message: "A short message asking user to confirm something",
                     confirm: () => id("status").textContent = "confirmed"
                 });
             }
 
             function confirmWithAbort() {
                 TipsyDialog.confirm({
-                    message: "Confirm?",
+                    message: "Do you concur?",
                     confirm: () => id("status").textContent = "confirmed",
                     abort: () => id("status").textContent = "aborted"
                 })

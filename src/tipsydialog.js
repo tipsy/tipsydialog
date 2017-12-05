@@ -65,17 +65,18 @@
             if (id(overlayId) !== null) {
                 throw Error("TipsyDialog already open");
             }
+            const centerOrFlex = (config.spin || !config.showAbort) ? centerCss : flexCss;
+            const padding = (config.spin || !config.showAbort) ? "padding-top: 40px" : "";
+            const spinMargin = config.spin ? "margin: 24px 0 16px" : "";
             document.body.insertAdjacentHTML("beforeEnd", `
               <div id="${overlayId}" style="${overlayCss}">
-                <div style="${dialogCss}">
-                  <div style="${contentCss}">
-                    ${config.message ? `<div style="${messageCss}">${config.message}</div>` : config.html }
-                  </div>
+                <div style="${dialogCss + padding}">
+                  ${config.message ? `<div style="${messageCss + centerOrFlex}">${config.message}</div>` : config.html }
                   ${config.isPrompt ? `<input id="${inputId}" style="${inputCss}" type="text" placeholder="${config.placeholder || "Enter something"}">` : "" }
-                  <div style="${config.rightAlignBtns ? containerCss + containerRightAlignCss : containerCss}">
+                  <div style="${containerCss + centerOrFlex + spinMargin}">
                     ${config.spin ? spinner : ""}
-                    ${config.showAbort ? `<div id="${abortId}" style="${config.rightAlignBtns ? defaultBtnCss + autoWidth : defaultBtnCss}">${config.abortBtnTxt || "Cancel"}</div>` : ""}
-                    ${!config.hideConfirm ? `<div id="${confirmId}" style="${config.rightAlignBtns ? confirmBtnCss + autoWidth : confirmBtnCss}">${config.confirmBtnTxt || "Ok"}</div>` : ""}
+                    ${config.showAbort ? `<div id="${abortId}" style="${defaultBtnCss}">${config.abortBtnTxt || "Cancel"}</div>` : ""}
+                    ${!config.hideConfirm ? `<div id="${confirmId}" style="${confirmBtnCss}">${config.confirmBtnTxt || "Ok"}</div>` : ""}
                   </div>
                 </div>
               </div>
@@ -131,45 +132,37 @@
             transform: translateY(-50%);
             background: #fff;
             color: #444;
-            padding: 20px;
+            padding: 24px;
             margin: 0 auto;
             left: 0;
             right: 0;
             width: calc(100% - 30px);
             max-width: 400px;
             border-radius: 3px;
-        `;
-
-        const contentCss = `
-            box-sizing: border-box;
-            margin: 25px 2%;
+            min-height: 160px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
         `;
 
         const messageCss = `
             font: 18px arial;
             font-weight: 700;
-            text-align: center;
         `;
 
         const inputCss = `
-            box-sizing: border-box;
-            width: 96%;
-            height: 40px;
+            margin: 40px 0 16px;
+            width: 100%;
+            height: 24px;
             border: 0;
             border-bottom: 2px solid #007ace;
-            margin: 0 2% 20px;
             font: 16px arial;
             outline: 0;
         `;
 
         const containerCss = `
             box-sizing: border-box;
-            text-align: center;
-            margin: 15px 0;
-        `;
-
-        const containerRightAlignCss = `
-            display: flex;
+            margin: 24px 0 0;
             justify-content: flex-end;
         `;
 
@@ -181,24 +174,29 @@
             color: #333;
             font-weight: 700;
             background: #eee;
-            width: 45%;
-            margin: 0 2%;
             display: inline-block;
-            text-align: center;
             cursor: pointer;
+            margin-right: 8px;
+        `;
+
+        const centerCss = `
+            text-align: center;
+        `;
+
+        const flexCss = `
+            display: flex;
         `;
 
         const confirmBtnCss = `
             ${defaultBtnCss}
+            margin-right: 0;
             color: #fff;
             background: #007ace;
         `;
 
-        const autoWidth = "width: auto";
-
         const spinner = `
             <?xml version="1.0" encoding="utf-8"?>
-            <svg width="48px" height="48px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid">
+            <svg width="40px" height="40px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid">
                 <circle cx="50" cy="50" r="40" stroke="#007ace" fill="none" stroke-width="7" stroke-linecap="round">
                     <animate attributeName="stroke-dashoffset" dur="1.5s" repeatCount="indefinite" from="502" to="0"></animate>
                     <animate attributeName="stroke-dasharray" dur="1.5s" repeatCount="indefinite" values="150.6 100.4;1 250;150.6 100.4"></animate>
