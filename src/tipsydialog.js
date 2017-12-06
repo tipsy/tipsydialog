@@ -39,14 +39,13 @@
                 showAbort: config.hideAbort !== true,
                 message: config.message,
                 html: config.html,
-                confirmBtnTxt: config.confirmBtnTxt || "Ok",
+                confirmBtnTxt: config.confirmBtnTxt || "Confirm",
                 abortBtnTxt: config.abortBtnTxt || "Cancel",
             });
         };
 
         this.prompt = function (config) {
             return createDialog({
-                rightAlignBtns: true,
                 isPrompt: true,
                 promptInvalidTxt: config.promptInvalidTxt,
                 placeholder: config.placeholder || "Enter something",
@@ -71,8 +70,8 @@
               <div id="${overlayId}" style="${overlayCss}">
                 <div style="${dialogCss + padding}">
                   ${config.message ? `<div style="${messageCss + centerOrFlex}">${config.message}</div>` : config.html }
-                  ${config.isPrompt ? `<input id="${inputId}" style="${inputCss}" type="text" placeholder="${config.placeholder}">` : "" }
-                  ${config.isPrompt ? `<div id="${inputErrorId}" style="${inputErrorCss}">${config.promptInvalidTxt}</div>` : ""}
+                  ${config.isPrompt ? `<input id="${inputId}" style="${inputCss}" type="text" placeholder="${config.placeholder}">
+                                       <div id="${inputErrorId}" style="${inputErrorCss}">${config.promptInvalidTxt}</div>` : "" }
                   <div style="${containerCss + centerOrFlex + spinMargin}">
                     ${config.spin ? spinner(40, "#007ACE") : ""}
                     ${config.showAbort ? `<div id="${abortId}" style="${defaultBtnCss}">${config.abortBtnTxt}</div>` : ""}

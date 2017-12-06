@@ -82,17 +82,15 @@
                     placeholder: "First name and last name",
                     confirmBtnTxt: "This is my name",
                     validate: value => value.length >= 1,
-                    process: value => {
-                        return new Promise((resolve, reject) => {
-                            setTimeout(() => {
-                                if (value.length >= 4) {
-                                    resolve();
-                                } else {
-                                    reject();
-                                }
-                            }, 2000);
-                        });
-                    },
+                    process: value => new Promise((resolve, reject) => {
+                        setTimeout(() => {
+                            if (value.length >= 4) {
+                                resolve();
+                            } else {
+                                reject();
+                            }
+                        }, 2000);
+                    }),
                     confirm: result => id("status").textContent = result,
                     abort: () => id("status").textContent = "no name given"
                 }).then(result => {
