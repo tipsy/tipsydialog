@@ -6,6 +6,7 @@
         const confirmId = "td-yes";
         const abortId = "td-no";
         const inputId = "td-input";
+        const inputErrorId = "td-input-error";
 
         const id = id => document.getElementById(id);
         const noop = () => {
@@ -50,12 +51,14 @@
             createDialog({
                 rightAlignBtns: true,
                 isPrompt: true,
+                promptInvalidTxt: config.promptInvalidTxt,
                 placeholder: config.placeholder,
                 showAbort: config.hideAbort !== true,
                 message: config.message,
                 html: config.html,
                 confirmBtnTxt: config.confirmBtnTxt,
                 abortBtnTxt: config.abortBtnTxt,
+                validateCb: config.validate,
                 confirmCb: config.confirm,
                 abortCb: config.abort,
             });
@@ -73,6 +76,7 @@
                 <div style="${dialogCss + padding}">
                   ${config.message ? `<div style="${messageCss + centerOrFlex}">${config.message}</div>` : config.html }
                   ${config.isPrompt ? `<input id="${inputId}" style="${inputCss}" type="text" placeholder="${config.placeholder || "Enter something"}">` : "" }
+                  ${config.isPrompt ? `<div id="${inputErrorId}" style="${inputErrorCss}">${config.promptInvalidTxt}</div>` : ""}
                   <div style="${containerCss + centerOrFlex + spinMargin}">
                     ${config.spin ? spinner : ""}
                     ${config.showAbort ? `<div id="${abortId}" style="${defaultBtnCss}">${config.abortBtnTxt || "Cancel"}</div>` : ""}
@@ -82,8 +86,19 @@
               </div>
             `);
             clickListener = e => {
+                if (config.isPrompt) {
+                    id(inputId).style.borderBottomColor = "#007ace";
+                    id(inputErrorId).style.visibility = "hidden";
+                }
                 const val = config.isPrompt ? id(inputId).value : "";
                 if (confirmId === e.target.id) {
+                    if (typeof config.validateCb === "function") {
+                        if (!config.validateCb.call(this, val)) {
+                            id(inputId).style.borderBottomColor = "#FA0634";
+                            id(inputErrorId).style.visibility = "visible";
+                            return;
+                        }
+                    }
                     (config.confirmCb || noop).call(this, val);
                     closeDialog();
                 }
@@ -124,7 +139,6 @@
         `;
 
         const dialogCss = `
-            box-sizing: border-box;
             font: 15px arial;
             position: fixed;
             left: 0;
@@ -151,7 +165,7 @@
         `;
 
         const inputCss = `
-            margin: 40px 0 16px;
+            margin: 40px 0 8px;
             width: 100%;
             height: 24px;
             border: 0;
@@ -160,23 +174,32 @@
             outline: 0;
         `;
 
+        const inputErrorCss = `
+            color: #FA0634;
+            font-size: 13px;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            visibility: hidden;
+        `;
+
         const containerCss = `
-            box-sizing: border-box;
             margin: 24px 0 0;
             justify-content: flex-end;
         `;
 
         const defaultBtnCss = `
-            box-sizing: border-box;
             border-radius: 3px;
             font: 16px arial;
-            padding: 10px 32px;
+            padding: 9px 16px;
             color: #333;
             font-weight: 700;
             background: #eee;
             display: inline-block;
             cursor: pointer;
             margin-right: 8px;
+            min-width: 88px;
+            text-align: center;
         `;
 
         const centerCss = `

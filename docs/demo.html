@@ -29,16 +29,14 @@
         <button onclick="confirmWithAbort()">Confirm/abort</button>
         <button onclick="confirmWithAbortAndHtml()">Confirm/abort custom HTML</button>
         <button onclick="prompt()">Prompt</button>
+        <button onclick="promptAsyncValidation()">Prompt (async validation)</button>
         <button onclick="spin()">Spin 2s</button>
         <h1>Status: <span id="status">...</span></h1>
         <script>
-
             let id = id => document.getElementById(id);
-
             function alert() {
                 TipsyDialog.alert("Information about something");
             }
-
             function confirm() {
                 TipsyDialog.confirm({
                     hideAbort: true,
@@ -46,7 +44,6 @@
                     confirm: () => id("status").textContent = "confirmed"
                 });
             }
-
             function confirmWithAbort() {
                 TipsyDialog.confirm({
                     message: "Do you concur?",
@@ -54,7 +51,6 @@
                     abort: () => id("status").textContent = "aborted"
                 })
             }
-
             function confirmWithAbortAndHtml() {
                 TipsyDialog.confirm({
                     html: `<h2>Are you sure?</h2><p>You can write <strong>whatever</strong> you <em>want</em> <a href="#">here</a></p>`,
@@ -62,16 +58,30 @@
                     abort: () => id("status").textContent = "aborted"
                 })
             }
-
             function prompt() {
                 TipsyDialog.prompt({
                     message: "Please enter your name",
+                    promptInvalidTxt: "At least 4 characters",
+                    validate: value => value.length >= 4,
                     placeholder: "First name and last name",
                     confirm: result => id("status").textContent = result,
-                    abort: result => id("status").textContent = "no name given"
+                    abort: () => id("status").textContent = "no name given"
                 });
             }
+            function promptAsyncValidation() {
+                TipsyDialog.prompt({
+                    message: "Please enter your name",
+                    promptInvalidTxt: "At least 4 characters",
+                    placeholder: "First name and last name",
+                    validate: () => {
+                        setTimeout(() => {
 
+                        }, 200);
+                    },
+                    confirm: result => id("status").textContent = result,
+                    abort: () => id("status").textContent = "no name given"
+                });
+            }
             function spin() {
                 TipsyDialog.spin("Please wait...");
                 setTimeout(() => TipsyDialog.stopSpinning(), 2000);
