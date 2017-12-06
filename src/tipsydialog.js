@@ -14,6 +14,7 @@
         const noopProcess = () => Promise.resolve();
 
         let clickListener = null;
+        let spinning = false;
 
         this.spin = function (message) {
             createDialog({
@@ -85,6 +86,9 @@
             `);
             return new Promise((resolve, reject) => {
                 clickListener = e => {
+                    if (spinning) {
+                        return;
+                    }
                     setInputValid(true);
                     const val = config.isPrompt ? id(inputId).value : "";
                     if (confirmId === e.target.id) {
@@ -117,6 +121,7 @@
         }
 
         function setBtnSpinState(spin, text) {
+            spinning = spin;
             id(confirmId).style.width = id(confirmId).getBoundingClientRect().width; // maintain width
             id(confirmId).innerHTML = spin ? spinner(20, "#fff") : text;
         }
@@ -200,6 +205,7 @@
         `;
 
         const defaultBtnCss = `
+            user-select: none;
             border-radius: 3px;
             font: 16px arial;
             padding: 00 16px;
