@@ -41,8 +41,8 @@
                 showAbort: config.hideAbort !== true,
                 message: config.message,
                 html: config.html,
-                confirmBtnTxt: config.confirmBtnTxt,
-                abortBtnTxt: config.abortBtnTxt,
+                confirmBtnTxt: config.confirmBtnTxt || "Ok",
+                abortBtnTxt: config.abortBtnTxt || "Cancel",
             });
         };
 
@@ -51,12 +51,12 @@
                 rightAlignBtns: true,
                 isPrompt: true,
                 promptInvalidTxt: config.promptInvalidTxt,
-                placeholder: config.placeholder,
+                placeholder: config.placeholder || "Enter something",
                 showAbort: config.hideAbort !== true,
                 message: config.message,
                 html: config.html,
-                confirmBtnTxt: config.confirmBtnTxt,
-                abortBtnTxt: config.abortBtnTxt,
+                confirmBtnTxt: config.confirmBtnTxt || "Ok",
+                abortBtnTxt: config.abortBtnTxt || "Cancel",
                 validateCb: config.validate,
                 processCb: config.process,
             });
@@ -73,21 +73,19 @@
               <div id="${overlayId}" style="${overlayCss}">
                 <div style="${dialogCss + padding}">
                   ${config.message ? `<div style="${messageCss + centerOrFlex}">${config.message}</div>` : config.html }
-                  ${config.isPrompt ? `<input id="${inputId}" style="${inputCss}" type="text" placeholder="${config.placeholder || "Enter something"}">` : "" }
+                  ${config.isPrompt ? `<input id="${inputId}" style="${inputCss}" type="text" placeholder="${config.placeholder}">` : "" }
                   ${config.isPrompt ? `<div id="${inputErrorId}" style="${inputErrorCss}">${config.promptInvalidTxt}</div>` : ""}
                   <div style="${containerCss + centerOrFlex + spinMargin}">
-                    ${config.spin ? spinner : ""}
-                    ${config.showAbort ? `<div id="${abortId}" style="${defaultBtnCss}">${config.abortBtnTxt || "Cancel"}</div>` : ""}
-                    ${!config.hideConfirm ? `<div id="${confirmId}" style="${confirmBtnCss}">${config.confirmBtnTxt || "Ok"}</div>` : ""}
+                    ${config.spin ? spinner(40, "#007ACE") : ""}
+                    ${config.showAbort ? `<div id="${abortId}" style="${defaultBtnCss}">${config.abortBtnTxt}</div>` : ""}
+                    ${!config.hideConfirm ? `<div id="${confirmId}" style="${confirmBtnCss}">${config.confirmBtnTxt}</div>` : ""}
                   </div>
                 </div>
               </div>
             `);
             return new Promise((resolve, reject) => {
                 clickListener = e => {
-                    if (config.isPrompt) {
-                        setInputValid(true);
-                    }
+                    setInputValid(true);
                     const val = config.isPrompt ? id(inputId).value : "";
                     if (confirmId === e.target.id) {
                         if (!(config.validateCb || noopValidate).call(this, val)) {
@@ -96,7 +94,11 @@
                         (config.processCb || noopProcess).call(this, val).then(() => {
                             resolve(val);
                             closeDialog();
-                        }).catch(() => setInputValid(false));
+                        }).catch(() => {
+                            setBtnSpinState(false, config.confirmBtnTxt);
+                            setInputValid(false)
+                        });
+                        setTimeout(() => setBtnSpinState(true), 50);
                     }
                     if (abortId === e.target.id) {
                         reject();
@@ -108,8 +110,15 @@
         };
 
         function setInputValid(valid) {
-            id(inputId).style.borderBottomColor = valid ? "#007ACE" : "#FA0634";
-            id(inputErrorId).style.visibility = valid ? "hidden" : "visible";
+            if (id(inputId) !== null) {
+                id(inputId).style.borderBottomColor = valid ? "#007ACE" : "#FA0634";
+                id(inputErrorId).style.visibility = valid ? "hidden" : "visible";
+            }
+        }
+
+        function setBtnSpinState(spin, text) {
+            id(confirmId).style.width = id(confirmId).getBoundingClientRect().width; // maintain width
+            id(confirmId).innerHTML = spin ? spinner(20, "#fff") : text;
         }
 
         function openDialog() {
@@ -193,7 +202,7 @@
         const defaultBtnCss = `
             border-radius: 3px;
             font: 16px arial;
-            padding: 9px 16px;
+            padding: 00 16px;
             color: #333;
             font-weight: 700;
             background: #eee;
@@ -201,7 +210,10 @@
             cursor: pointer;
             margin-right: 8px;
             min-width: 88px;
-            text-align: center;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
         `;
 
         const centerCss = `
@@ -219,12 +231,12 @@
             background: #007ace;
         `;
 
-        const spinner = `
+        const spinner = (size, color) => `
             <?xml version="1.0" encoding="utf-8"?>
-            <svg width="40px" height="40px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid">
-                <circle cx="50" cy="50" r="40" stroke="#007ace" fill="none" stroke-width="7" stroke-linecap="round">
-                    <animate attributeName="stroke-dashoffset" dur="1.5s" repeatCount="indefinite" from="502" to="0"></animate>
-                    <animate attributeName="stroke-dasharray" dur="1.5s" repeatCount="indefinite" values="150.6 100.4;1 250;150.6 100.4"></animate>
+            <svg width="${size}px" height="${size}px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid">
+                <circle cx="50" cy="50" r="40" stroke="${color}" fill="none" stroke-width="10" stroke-linecap="round">
+                    <animate attributeName="stroke-dashoffset" dur="1.5s" repeatCount="indefinite" from="500" to="0"></animate>
+                    <animate attributeName="stroke-dasharray" dur="1.5s" repeatCount="indefinite" values="150 100;1 250;150 100"></animate>
                 </circle>
             </svg>
         `;
