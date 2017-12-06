@@ -45,24 +45,23 @@
                 TipsyDialog.confirm({
                     hideAbort: true,
                     message: "A short message asking user to confirm something",
-                    confirm: () => id("status").textContent = "confirmed"
-                });
+                }).then(() => id("status").textContent = "confirmed")
             }
 
             function confirmWithAbort() {
                 TipsyDialog.confirm({
                     message: "Do you concur?",
-                    confirm: () => id("status").textContent = "confirmed",
-                    abort: () => id("status").textContent = "aborted"
-                })
+                }).then(() => {
+                    id("status").textContent = "confirmed";
+                }).catch(() => id("status").textContent = "aborted")
             }
 
             function confirmWithAbortAndHtml() {
                 TipsyDialog.confirm({
                     html: `<h2>Are you sure?</h2><p>You can write <strong>whatever</strong> you <em>want</em> <a href="#">here</a></p>`,
-                    confirm: () => id("status").textContent = "confirmed",
-                    abort: () => id("status").textContent = "aborted"
-                })
+                }).then(() => {
+                    id("status").textContent = "confirmed";
+                }).catch(() => id("status").textContent = "aborted")
             }
 
             function prompt() {
@@ -71,9 +70,9 @@
                     promptInvalidTxt: "At least 4 characters",
                     validate: value => value.length >= 4,
                     placeholder: "First name and last name",
-                    confirm: result => id("status").textContent = result,
-                    abort: () => id("status").textContent = "no name given"
-                });
+                }).then(result => {
+                    id("status").textContent = result;
+                }).catch(() => id("status").textContent = "no name given")
             }
 
             function promptAsyncProcessing() {
@@ -82,18 +81,22 @@
                     promptInvalidTxt: "At least 4 characters",
                     placeholder: "First name and last name",
                     validate: value => value.length >= 1,
-                    process: (value, callback) => {
-                        setTimeout(() => {
-                            if (value.length >= 4) {
-                                callback.call(this, true)
-                            } else {
-                                callback.call(this, false);
-                            }
-                        }, 1000);
+                    process: value => {
+                        return new Promise((resolve, reject) => {
+                            setTimeout(() => {
+                                if (value.length >= 4) {
+                                    resolve();
+                                } else {
+                                    reject();
+                                }
+                            }, 1000);
+                        });
                     },
                     confirm: result => id("status").textContent = result,
                     abort: () => id("status").textContent = "no name given"
-                });
+                }).then(result => {
+                    id("status").textContent = result;
+                }).catch(() => id("status").textContent = "no name given")
             }
 
             function spin() {

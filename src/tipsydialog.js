@@ -9,8 +9,9 @@
         const inputErrorId = "td-input-error";
 
         const id = id => document.getElementById(id);
-        const noop = () => {
-        };
+
+        const noopValidate = () => true;
+        const noopProcess = () => Promise.resolve();
 
         let clickListener = null;
 
@@ -36,19 +37,17 @@
         };
 
         this.confirm = function (config) {
-            createDialog({
+            return createDialog({
                 showAbort: config.hideAbort !== true,
                 message: config.message,
                 html: config.html,
                 confirmBtnTxt: config.confirmBtnTxt,
                 abortBtnTxt: config.abortBtnTxt,
-                confirmCb: config.confirm,
-                abortCb: config.abort,
             });
         };
 
         this.prompt = function (config) {
-            createDialog({
+            return createDialog({
                 rightAlignBtns: true,
                 isPrompt: true,
                 promptInvalidTxt: config.promptInvalidTxt,
@@ -60,8 +59,6 @@
                 abortBtnTxt: config.abortBtnTxt,
                 validateCb: config.validate,
                 processCb: config.process,
-                confirmCb: config.confirm,
-                abortCb: config.abort,
             });
         };
 
@@ -86,37 +83,28 @@
                 </div>
               </div>
             `);
-            clickListener = e => {
-                if (config.isPrompt) {
-                    setInputValid(true);
-                }
-                const val = config.isPrompt ? id(inputId).value : "";
-                if (confirmId === e.target.id) {
-                    if (typeof config.validateCb === "function") {
-                        if (!config.validateCb.call(this, val)) {
+            return new Promise((resolve, reject) => {
+                clickListener = e => {
+                    if (config.isPrompt) {
+                        setInputValid(true);
+                    }
+                    const val = config.isPrompt ? id(inputId).value : "";
+                    if (confirmId === e.target.id) {
+                        if (!(config.validateCb || noopValidate).call(this, val)) {
                             return setInputValid(false);
                         }
+                        (config.processCb || noopProcess).call(this, val).then(() => {
+                            resolve(val);
+                            closeDialog();
+                        }).catch(() => setInputValid(false));
                     }
-                    if (typeof config.processCb === "function") {
-                        return config.processCb.call(this, val, processCallback)
+                    if (abortId === e.target.id) {
+                        reject();
+                        closeDialog();
                     }
-                    (config.confirmCb || noop).call(this, val);
-                    closeDialog();
-                }
-                if (abortId === e.target.id) {
-                    (config.abortCb || noop).call();
-                    closeDialog();
-                }
-
-                function processCallback(success) {
-                    if (!success) {
-                        return setInputValid(false);
-                    }
-                    (config.confirmCb || noop).call(this, val);
-                    closeDialog();
-                }
-            };
-            openDialog();
+                };
+                openDialog();
+            });
         };
 
         function setInputValid(valid) {
