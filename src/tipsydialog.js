@@ -10,11 +10,8 @@
 
         const id = id => document.getElementById(id);
 
-        const noopValidate = () => true;
-        const noopProcess = () => Promise.resolve();
-
         let clickListener = null;
-        let spinning = false;
+        let confirmSpinning = false;
 
         this.spin = function (message) {
             createDialog({
@@ -86,23 +83,28 @@
             `);
             return new Promise((resolve, reject) => {
                 clickListener = e => {
-                    if (spinning) {
+                    if (confirmSpinning) {
                         return;
                     }
                     setInputValid(true);
                     const val = config.isPrompt ? id(inputId).value : "";
                     if (confirmId === e.target.id) {
-                        if (!(config.validateCb || noopValidate).call(this, val)) {
+                        if (typeof config.validateCb === "function" && !config.validateCb.call(this, val)) {
                             return setInputValid(false);
                         }
-                        (config.processCb || noopProcess).call(this, val).then(() => {
+                        if (typeof config.processCb === "function") {
+                            setBtnSpinState(true);
+                            config.processCb.call(this, val).then(() => {
+                                resolve(val);
+                                closeDialog();
+                            }).catch(() => {
+                                setBtnSpinState(false, config.confirmBtnTxt);
+                                setInputValid(false);
+                            });
+                        } else {
                             resolve(val);
                             closeDialog();
-                        }).catch(() => {
-                            setBtnSpinState(false, config.confirmBtnTxt);
-                            setInputValid(false)
-                        });
-                        setTimeout(() => setBtnSpinState(true), 50);
+                        }
                     }
                     if (abortId === e.target.id) {
                         reject();
@@ -121,7 +123,7 @@
         }
 
         function setBtnSpinState(spin, text) {
-            spinning = spin;
+            confirmSpinning = spin;
             id(confirmId).style.width = id(confirmId).getBoundingClientRect().width; // maintain width
             id(confirmId).innerHTML = spin ? spinner(20, "#fff") : text;
         }
@@ -135,6 +137,7 @@
         }
 
         function closeDialog() {
+            confirmSpinning = false;
             document.removeEventListener("click", clickListener);
             if (id(overlayId) !== null) {
                 id(overlayId).style.opacity = "0";
