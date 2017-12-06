@@ -211,7 +211,7 @@
             margin-right: 8px;
             min-width: 88px;
             height: 36px;
-            display: flex;
+            display: inline-flex;
             align-items: center;
             justify-content: space-around;
         `;
