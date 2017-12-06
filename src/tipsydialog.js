@@ -59,6 +59,7 @@
                 confirmBtnTxt: config.confirmBtnTxt,
                 abortBtnTxt: config.abortBtnTxt,
                 validateCb: config.validate,
+                processCb: config.process,
                 confirmCb: config.confirm,
                 abortCb: config.abort,
             });
@@ -87,17 +88,17 @@
             `);
             clickListener = e => {
                 if (config.isPrompt) {
-                    id(inputId).style.borderBottomColor = "#007ace";
-                    id(inputErrorId).style.visibility = "hidden";
+                    setInputValid(true);
                 }
                 const val = config.isPrompt ? id(inputId).value : "";
                 if (confirmId === e.target.id) {
                     if (typeof config.validateCb === "function") {
                         if (!config.validateCb.call(this, val)) {
-                            id(inputId).style.borderBottomColor = "#FA0634";
-                            id(inputErrorId).style.visibility = "visible";
-                            return;
+                            return setInputValid(false);
                         }
+                    }
+                    if (typeof config.processCb === "function") {
+                        return config.processCb.call(this, val, processCallback)
                     }
                     (config.confirmCb || noop).call(this, val);
                     closeDialog();
@@ -106,9 +107,22 @@
                     (config.abortCb || noop).call();
                     closeDialog();
                 }
+
+                function processCallback(success) {
+                    if (!success) {
+                        return setInputValid(false);
+                    }
+                    (config.confirmCb || noop).call(this, val);
+                    closeDialog();
+                }
             };
-            openDialog()
+            openDialog();
         };
+
+        function setInputValid(valid) {
+            id(inputId).style.borderBottomColor = valid ? "#007ACE" : "#FA0634";
+            id(inputErrorId).style.visibility = valid ? "hidden" : "visible";
+        }
 
         function openDialog() {
             if (id(inputId) !== null) {
