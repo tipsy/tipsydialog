@@ -7,6 +7,7 @@
         const abortId = "td-no";
         const inputId = "td-input";
         const inputErrorId = "td-input-error";
+        const countId = "td-count";
 
         const id = id => document.getElementById(id);
 
@@ -53,6 +54,7 @@
                 showAbort: config.hideAbort !== true,
                 message: config.message,
                 html: config.html,
+                charLimit: config.charLimit,
                 confirmBtnTxt: config.confirmBtnTxt || "Ok",
                 abortBtnTxt: config.abortBtnTxt || "Cancel",
                 validateCb: config.validate,
@@ -71,8 +73,9 @@
               <div id="${overlayId}" style="${overlayCss}">
                 <div style="${dialogCss + padding}">
                   ${c.message ? `<div style="${messageCss + centerOrFlex}">${c.message}</div>` : c.html }
-                  ${c.isPrompt ? `<input id="${inputId}" style="${inputCss}" type="${c.inputType}" placeholder="${c.placeholder}">
-                                       <div id="${inputErrorId}" style="${inputErrorCss}">${c.promptInvalidTxt}</div>` : "" }
+                  ${c.isPrompt ? `<div style="${inputWrapCss}"><input id="${inputId}" style="${inputCss}" type="${c.inputType}" placeholder="${c.placeholder}">
+                                       <div id="${inputErrorId}" style="${inputErrorCss}">${c.promptInvalidTxt}</div>
+                                       ${c.charLimit ? `<span style="${countCss}"><span id="${countId}">0</span>/${c.charLimit}</span></div>` : ""}` : "" }
                   <div style="${containerCss + centerOrFlex + spinMargin}">
                     ${c.spin ? spinner(40, "#007ACE") : ""}
                     ${c.showAbort ? `<div id="${abortId}" style="${defaultBtnCss}">${c.abortBtnTxt}</div>` : ""}
@@ -114,6 +117,12 @@
                 openDialog();
             });
         };
+
+        document.addEventListener("input", e => {
+            if (e.target.id === inputId) {
+                id(countId).innerHTML = e.target.value.length;
+            }
+        });
 
         function setInputValid(valid) {
             if (id(inputId) !== null) {
@@ -183,6 +192,10 @@
             font-weight: 700;
         `;
 
+        const inputWrapCss = `
+            position: relative;
+        `;
+
         const inputCss = `
             margin: 40px 0 8px;
             width: 100%;
@@ -191,6 +204,13 @@
             border-bottom: 2px solid #007ace;
             font: 16px arial;
             outline: 0;
+        `;
+
+        const countCss = `
+            position: absolute;
+            right: 0;
+            bottom: 0;
+            font-size: 13px;
         `;
 
         const inputErrorCss = `

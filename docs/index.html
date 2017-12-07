@@ -80,8 +80,9 @@
             function telPrompt() {
                 TipsyDialog.prompt({
                     message: "Please enter your phone number",
-                    promptInvalidTxt: "At least 8 digits",
-                    validate: value => value.length >= 8,
+                    promptInvalidTxt: "8 - 12 digits",
+                    validate: value => value.length >= 8 && value.length <= 12,
+                    charLimit: 12,
                     inputType: "tel",
                     placeholder: "Phone number",
                 }).then(result => {
