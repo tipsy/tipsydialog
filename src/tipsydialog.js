@@ -47,6 +47,7 @@
         this.prompt = function (config) {
             return createDialog({
                 isPrompt: true,
+                inputType: config.inputType || "text",
                 promptInvalidTxt: config.promptInvalidTxt,
                 placeholder: config.placeholder || "Enter something",
                 showAbort: config.hideAbort !== true,
@@ -59,23 +60,23 @@
             });
         };
 
-        let createDialog = config => {
+        let createDialog = c => {
             if (id(overlayId) !== null) {
                 throw Error("TipsyDialog already open");
             }
-            const centerOrFlex = (config.spin || !config.showAbort) ? centerCss : flexCss;
-            const padding = (config.spin || !config.showAbort) ? "padding-top: 40px" : "";
-            const spinMargin = config.spin ? "margin: 24px 0 16px" : "";
+            const centerOrFlex = (c.spin || !c.showAbort) ? centerCss : flexCss;
+            const padding = (c.spin || !c.showAbort) ? "padding-top: 40px" : "";
+            const spinMargin = c.spin ? "margin: 24px 0 16px" : "";
             document.body.insertAdjacentHTML("beforeEnd", `
               <div id="${overlayId}" style="${overlayCss}">
                 <div style="${dialogCss + padding}">
-                  ${config.message ? `<div style="${messageCss + centerOrFlex}">${config.message}</div>` : config.html }
-                  ${config.isPrompt ? `<input id="${inputId}" style="${inputCss}" type="text" placeholder="${config.placeholder}">
-                                       <div id="${inputErrorId}" style="${inputErrorCss}">${config.promptInvalidTxt}</div>` : "" }
+                  ${c.message ? `<div style="${messageCss + centerOrFlex}">${c.message}</div>` : c.html }
+                  ${c.isPrompt ? `<input id="${inputId}" style="${inputCss}" type="${c.inputType}" placeholder="${c.placeholder}">
+                                       <div id="${inputErrorId}" style="${inputErrorCss}">${c.promptInvalidTxt}</div>` : "" }
                   <div style="${containerCss + centerOrFlex + spinMargin}">
-                    ${config.spin ? spinner(40, "#007ACE") : ""}
-                    ${config.showAbort ? `<div id="${abortId}" style="${defaultBtnCss}">${config.abortBtnTxt}</div>` : ""}
-                    ${!config.hideConfirm ? `<div id="${confirmId}" style="${confirmBtnCss}">${config.confirmBtnTxt}</div>` : ""}
+                    ${c.spin ? spinner(40, "#007ACE") : ""}
+                    ${c.showAbort ? `<div id="${abortId}" style="${defaultBtnCss}">${c.abortBtnTxt}</div>` : ""}
+                    ${!c.hideConfirm ? `<div id="${confirmId}" style="${confirmBtnCss}">${c.confirmBtnTxt}</div>` : ""}
                   </div>
                 </div>
               </div>
@@ -86,18 +87,18 @@
                         return;
                     }
                     setInputValid(true);
-                    const val = config.isPrompt ? id(inputId).value : "";
+                    const val = c.isPrompt ? id(inputId).value : "";
                     if (confirmId === e.target.id) {
-                        if (typeof config.validateCb === "function" && !config.validateCb.call(this, val)) {
+                        if (typeof c.validateCb === "function" && !c.validateCb.call(this, val)) {
                             return setInputValid(false);
                         }
-                        if (typeof config.processCb === "function") {
+                        if (typeof c.processCb === "function") {
                             setBtnSpinState(true);
-                            config.processCb.call(this, val).then(() => {
+                            c.processCb.call(this, val).then(() => {
                                 resolve(val);
                                 closeDialog();
                             }).catch(() => {
-                                setBtnSpinState(false, config.confirmBtnTxt);
+                                setBtnSpinState(false, c.confirmBtnTxt);
                                 setInputValid(false);
                             });
                         } else {

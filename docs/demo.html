@@ -30,7 +30,8 @@
         <button onclick="confirm()">Confirm</button>
         <button onclick="confirmWithAbort()">Confirm/abort</button>
         <button onclick="confirmWithAbortAndHtml()">Confirm/abort custom HTML</button>
-        <button onclick="prompt()">Prompt</button>
+        <button onclick="prompt()">Text prompt</button>
+        <button onclick="telPrompt()">Number prompt</button>
         <button onclick="promptAsyncProcessing()">Prompt (async processing)</button>
         <button onclick="spin()">Spin 2s</button>
         <h1>Status: <span id="status">...</span></h1>
@@ -73,6 +74,18 @@
                 }).then(result => {
                     id("status").textContent = result;
                 }).catch(() => id("status").textContent = "no name given")
+            }
+
+            function telPrompt() {
+                TipsyDialog.prompt({
+                    message: "Please enter your phone number",
+                    promptInvalidTxt: "At least 8 digits",
+                    validate: value => value.length >= 8,
+                    inputType: "tel",
+                    placeholder: "Phone number",
+                }).then(result => {
+                    id("status").textContent = result;
+                }).catch(() => id("status").textContent = "no phone number given")
             }
 
             function promptAsyncProcessing() {
