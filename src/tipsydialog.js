@@ -53,7 +53,6 @@
                 placeholder: config.placeholder || "Enter something",
                 showAbort: config.hideAbort !== true,
                 message: config.message,
-                html: config.html,
                 charLimit: config.charLimit,
                 confirmBtnTxt: config.confirmBtnTxt || "Ok",
                 abortBtnTxt: config.abortBtnTxt || "Cancel",
@@ -72,14 +71,14 @@
             document.body.insertAdjacentHTML("beforeEnd", `
               <div id="${overlayId}" style="${overlayCss}">
                 <div style="${dialogCss + padding}">
-                  ${c.message ? `<div style="${messageCss + centerOrFlex}">${c.message}</div>` : c.html }
+                  ${c.message ? `<div style="${messageCss + centerOrFlex}">${c.message}</div>` : `<div>${c.html}</div>` }
                   ${c.isPrompt ? `<div style="${inputWrapCss}"><input id="${inputId}" style="${inputCss}" type="${c.inputType}" placeholder="${c.placeholder}">
                                        <div id="${inputErrorId}" style="${inputErrorCss}">${c.promptInvalidTxt}</div>
-                                       ${c.charLimit ? `<span style="${countCss}"><span id="${countId}">0</span>/${c.charLimit}</span></div>` : ""}` : "" }
+                                       ${c.charLimit ? `<span style="${countCss}"><span id="${countId}">0</span>/${c.charLimit}</span></div>` : ``}` : `` }
                   <div style="${containerCss + centerOrFlex + spinMargin}">
-                    ${c.spin ? spinner(40, "#007ACE") : ""}
-                    ${c.showAbort ? `<div id="${abortId}" style="${defaultBtnCss}">${c.abortBtnTxt}</div>` : ""}
-                    ${!c.hideConfirm ? `<div id="${confirmId}" style="${confirmBtnCss}">${c.confirmBtnTxt}</div>` : ""}
+                    ${c.spin ? spinner(40, "#007ACE") : ``}
+                    ${c.showAbort ? `<div id="${abortId}" style="${defaultBtnCss}">${c.abortBtnTxt}</div>` : ``}
+                    ${!c.hideConfirm ? `<div id="${confirmId}" style="${confirmBtnCss}">${c.confirmBtnTxt}</div>` : ``}
                   </div>
                 </div>
               </div>
@@ -119,7 +118,7 @@
         };
 
         document.addEventListener("input", e => {
-            if (e.target.id === inputId) {
+            if (e.target.id === inputId && id(countId) !== null) {
                 id(countId).innerHTML = e.target.value.length;
             }
         });
